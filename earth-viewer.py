@@ -58,7 +58,7 @@ class EarthViewer:
         """Create appropriate map projection based on clicked location"""
         fig = plt.figure(figsize=(20, 10))
         
-        # First subplot: Orthographic view
+        # First subplot: Orthographic view (unchanged)
         ax1 = plt.subplot(121, projection=ccrs.Orthographic(center_lon, center_lat))
         ax1.add_feature(cfeature.COASTLINE, linewidth=0.5)
         ax1.add_feature(cfeature.BORDERS, linewidth=0.5)
@@ -70,12 +70,18 @@ class EarthViewer:
                 markersize=10, label='Selected Point')
         ax1.set_title(f'Orthographic View\nCentered at {center_lat:.1f}°N, {center_lon:.1f}°E')
         
-        # Second subplot: Lambert Cylindrical projection centered on clicked point
-        proj = ccrs.LambertCylindrical(central_longitude=center_lon)
-            
-        ax2 = plt.subplot(122, projection=proj)
+        # Second subplot: Create rotated Lambert Cylindrical projection
+        # Create a rotated geodetic coordinate system
+        rotated_pole = ccrs.RotatedPole(
+            pole_longitude=center_lon + 180,
+            pole_latitude=-center_lat,
+            central_rotated_longitude=0
+        )
         
-        # Add map features
+        # Use this as the base for our Lambert Cylindrical
+        ax2 = plt.subplot(122, projection=rotated_pole)
+        
+        # Add map features with explicit transform
         ax2.add_feature(cfeature.COASTLINE, linewidth=0.5)
         ax2.add_feature(cfeature.BORDERS, linewidth=0.5)
         ax2.add_feature(cfeature.LAND, color='lightgray')
@@ -88,17 +94,15 @@ class EarthViewer:
         gl.top_labels = False
         gl.right_labels = False
         
-        # Set the extent to show ±180° longitude and ±90° latitude
-        lon_min = center_lon - 180
-        lon_max = center_lon + 180
-        ax2.set_extent([lon_min, lon_max, -90, 90], crs=ccrs.PlateCarree())
+        # Set the extent in the rotated coordinate system
+        ax2.set_global()
         
-        # Mark the clicked point
+        # Transform the center point to the rotated system and plot it
         ax2.plot([center_lon], [center_lat], 'ro', transform=ccrs.PlateCarree(),
                 markersize=10, label='Selected Point')
         
         # Set title
-        ax2.set_title(f'Lambert Cylindrical Projection\nCentered at {center_lat:.1f}°N, {center_lon:.1f}°E')
+        ax2.set_title(f'Rotated Lambert Cylindrical Projection\nCentered at {center_lat:.1f}°N, {center_lon:.1f}°E')
         
         # Add legends
         ax1.legend(loc='lower left')
