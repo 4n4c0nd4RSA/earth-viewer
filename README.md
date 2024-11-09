@@ -2,7 +2,8 @@
 
 An interactive 3D Earth globe viewer with dynamic 2D map projection capabilities. Click anywhere on the 3D globe to generate corresponding 2D map projections.
 
-![Earth Viewer Demo](https://api.placeholder.com/400/300)
+![Earth Viewer Demo](./a.png)
+![Earth Viewer Demo](./b.png)
 
 ## Features
 
